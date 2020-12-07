@@ -1,0 +1,318 @@
+
+<template> 
+    <div class="cont" >
+        <div class="content">
+            <div class="cont_left " :style="leftStyle">
+                <div class="menuTarger" @click="isCollapsed = !isCollapsed" style=""><Icon type="md-menu" :color="isCollapsed?'#65c1ff ':'#fff'"/></div>
+                <div class="menucont">
+                    <Menu class="catalogMenu" @on-select="menuChange" :open-names="['1','2','3']" :active-name="pageName" v-show="!isCollapsed">
+                        <Submenu name="1">
+                            <template slot="title">
+                                <Icon type="ios-paper" />
+                                目录管理
+                            </template>
+                            <MenuItem name="initCatalog">目录初始化</MenuItem>
+                            <MenuItem name="maintainCatalog">目录维护</MenuItem>
+                            <MenuItem name="orgUpdate">组织维护</MenuItem>
+                            <MenuItem name="userUpdate">账户维护</MenuItem>
+                            <Submenu name="2">
+                                <template slot="title">
+                                    <Icon type="ios-people" />
+                                    目录审批
+                                </template>
+                                <MenuItem name="approve">审批人配置</MenuItem>
+                                <MenuItem name="approveTodo">审批待办</MenuItem>
+                                <MenuItem name="approveRecord">审批记录</MenuItem>
+                            </Submenu>
+                            <Submenu name="3">
+                                <template slot="title">
+                                    <Icon type="ios-stats" />
+                                    目录同步
+                                </template>
+                                <MenuItem name="dataConfig">数据源配置</MenuItem>
+                                <MenuItem name="chart">目录同步报表</MenuItem>
+                                <MenuItem name="task">同步任务</MenuItem>
+                                <MenuItem name="log">同步日志</MenuItem>
+                            </Submenu>
+                        </Submenu>
+                        
+                    </Menu>
+
+                </div>
+                
+            </div>
+            <div class="cont_right" :style="rightStyle">
+                <div class="breadcrumb">
+                    <Breadcrumb>
+                        <BreadcrumbItem >目录管理</BreadcrumbItem>
+                        <BreadcrumbItem v-if="pageParent" >{{pageParent}}</BreadcrumbItem>
+                        <BreadcrumbItem>{{page}}</BreadcrumbItem>
+                    </Breadcrumb>
+                </div>
+                <keep-alive>
+                    <init-catalog :is="pageName" @menu="menuChange"></init-catalog>  
+                    <maintain-catalog :is="pageName"></maintain-catalog>  
+                    <approve :is="pageName"></approve>  
+                    <approve-todo :is="pageName"></approve-todo> 
+                    <approve-record :is="pageName"></approve-record>  
+                    <data-config :is="pageName"></data-config>  
+                    <org-update :is="pageName"></org-update>  
+                    <user-update :is="pageName"></user-update>  
+                </keep-alive>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+
+import Cookies from 'js-cookie';
+
+import initCatalog from "./initCatalog.vue";
+import maintainCatalog from "./maintainCatalog";
+import approve from "./approve";//审批人
+import approveTodo from "./approveTodo";//审批代办
+import approveRecord from "./approveRecord";//审批记录
+import chart from "./chart";//目录同步报表
+import task from "./task";//目录同步任务
+import log from "./log";//目录同步日志
+import dataConfig from "./dataConfig";//目录同步日志
+import orgUpdate from "./orgUpdate";//目录同步日志
+import userUpdate from "./userUpdate";//目录同步日志
+export default {
+    data () {
+        return {
+            pageName:this.$route.params.name?this.$route.params.name:'maintainCatalog',
+            isCollapsed:false,
+            leftStyle:{},
+            rightStyle:{}
+        }
+    },
+    created(){
+        
+    },
+    watch:{
+       isCollapsed(val){
+           if(val){
+               this.leftStyle = {width:'40px',overflow:'hidden'}
+               this.rightStyle = {width:'calc(100% - 80px)'}
+           }else{
+               this.leftStyle = {}
+               this.rightStyle = {}
+           }
+       }
+    },
+    computed:{
+        pageParent(){
+            let pp = '';
+            switch(this.pageName) {
+                case 'initCatalog':
+                    return ''
+                    break;
+                case 'maintainCatalog':
+                    return ''
+                    break;
+                case 'approve':
+                    return '目录审批'
+                    break;
+                case 'approveTodo':
+                    return '目录审批'
+                    break;
+                case 'approveRecord':
+                    return '目录审批'
+                    break;
+                case 'dataConfig':
+                    return '目录同步'
+                    break;
+                    break;
+                case 'chart':
+                    return '目录同步'
+                    break;
+                case 'task':
+                    return '目录同步'
+                    break;
+                case 'log':
+                    return '目录同步'
+                    break;
+            } 
+        },
+        page(){
+            let p = this.pageName;
+            let pp = '';
+            switch(this.pageName) {
+                case 'initCatalog':
+                    return '目录初始化'
+                    break;
+                case 'maintainCatalog':
+                    return '目录维护'
+                    break;
+                case 'orgUpdate':
+                    return '组织维护'
+                    break;
+                case 'userUpdate':
+                    return '账户维护'
+                    break;
+                case 'approve':
+                    return '审批人配置'
+                    break;
+                case 'approveTodo':
+                    return '审批代办'
+                    break;
+                case 'approveRecord':
+                    return '审批记录'
+                    break;
+                case 'dataConfig':
+                    return '数据源配置'
+                    break;
+                    break;
+                case 'chart':
+                    return '目录同步报表'
+                    break;
+                case 'task':
+                    return '同步任务'
+                    break;
+                case 'log':
+                    return '同步日志'
+                    break;
+            } 
+        }
+    },
+    methods: {
+        menuChange(name){
+            console.log(name)
+            this.pageName = name;
+        },
+        getParent(array, childs, ids) {
+          for (let i = 0; i < array.length; i++) {
+            let item = array[i];
+            if (Number(item.id) === Number(ids)) {
+              childs.push(item);
+              return childs;
+            }
+            if (item.children && item.children.length > 0) {
+              childs.push(item);
+              let rs = getParent(item.children, childs, ids);
+              if (rs) {
+                return rs;
+              }
+              else {
+                childs.remove(item);
+              }
+            }
+          }
+          return false;
+        }
+    },
+    components:{
+        initCatalog,
+        maintainCatalog,
+        approve,
+        approveTodo,
+        approveRecord,
+        chart,
+        task,
+        log,
+        dataConfig,
+        orgUpdate,
+        userUpdate
+    }
+};
+</script>
+
+<style lang="less" scoped>
+    .cont{
+        width: 100%;
+        height: 100%;
+        padding: 20px 20px 20px 20px;
+    }
+    .cont .cont_left{
+        width: 240px;
+        height: 100%;
+        padding: 0px;
+        box-sizing: border-box;
+        float: left;
+        background: #fff;
+        border-radius: 5px;
+        position: relative;
+        transition: width  .3s;
+        overflow: hidden;
+    }
+    .cont .cont_left .menucont{
+        width: 240px;
+        height: 100%;
+        padding: 0px;
+        overflow: auto;
+        box-sizing: border-box;
+        float: left;
+        background: #fff;
+        border-radius: 5px;
+        position: relative;
+        
+    }
+    .cont .cont_right{
+        width: calc(100% - 260px);
+        min-width: 1000px;
+        height: 100%;
+        overflow-y: auto;
+        float: left;
+        margin-left:20px ;
+        background: #fff;
+        border-radius: 5px;
+        transition: width  .3s;
+    }
+    .cont .breadcrumb{
+        padding: 20px 20px 0px 20px;
+    }
+    .content{
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+    }
+    .ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu){
+        background: #e6f7ff;
+        border-bottom: 1px solid #1890ff;
+    }
+    .ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu):after {
+        display: none;
+    }
+    .ivu-menu-item{
+        background: #fff;
+        margin-top: 2px;
+    }
+    .menuTarger{
+        position: absolute;
+        right:4px;
+        top:5px;
+        z-index: 1000;
+        font-size: 26px;
+        color: #fff;
+        cursor: pointer;
+    }
+</style>
+<style>
+
+    .catalogMenu .ivu-menu-submenu-title{
+        background: #65c1ff !important;
+        color:#fff;
+    }
+    .cont .cont_right .ivu-table th{
+        background: #abd5ff;
+    }
+    .cont .cont_right .ivu-table-stripe .ivu-table-body tr:nth-child(2n) td, .ivu-table-stripe .ivu-table-fixed-body tr:nth-child(2n) td{
+        background-color: #fbfdff;
+    }
+    .cont .cont_right .ivu-table {
+        border-color: #ADB9CA !important;
+    }
+    .ivu-table td, .ivu-table th{
+        border-bottom: 1px solid #f0f5fb;
+    }
+    .ivu-table-border td, .ivu-table-border th{
+        border-right: 1px solid #e4eaf6;
+    }
+    .ivu-table-wrapper-with-border{
+        border: 1px solid #f0f5fb;
+        border-bottom: 0;
+        border-right: 0;
+    }
+</style>

@@ -1,0 +1,30 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0">
+    <title>Title</title>
+    <script src="js/vue.js"></script>
+</head>
+<body>
+   <div id="app">
+    <iframe width="100%" height="100%"  frameborder="0" scrolling="no" src="http://liveshare.huya.com/iframe/lpl"></iframe>
+   </div>
+</body>
+<script>
+    Vue.directive("hello",function(el,binding,vnode){
+       el.style["color"]= binding.value;
+    })
+    var app = new Vue({
+        el:"#app",
+        data:{
+            message:10,
+            color3:"red"
+        },
+        methods:{
+            add:function(){
+                this.message++;
+            }
+        }
+    })
+</script>
+</html>

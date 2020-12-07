@@ -1,0 +1,237 @@
+
+<template> 
+    <div class="audit" >
+        <div class="content">
+            <div class="menuTarger" @click="isCollapsed = !isCollapsed" :style="{'left':isCollapsed?'40px':'260px'}">
+                <div class="c1" v-if="!isCollapsed"><img src="../../assets/1.png"/></div>
+                <div class="c2" v-else><img src="../../assets/2.png"/></div>
+            </div>
+            <div class="cont_left " :style="leftStyle">
+                <!-- <div class="menuTarger" @click="isCollapsed = !isCollapsed" style=""><Icon type="md-menu" :color="isCollapsed?'#65c1ff ':'#fff'"/></div> -->
+                <div class="menucont">
+                    <Menu class="catalogMenu" @on-select="menuChange" :open-names="['1','2','3']" :active-name="pageName" v-show="!isCollapsed">
+                        <Submenu name="1">
+                            <template slot="title">
+                                <Icon type="ios-paper" />
+                                审计
+                            </template>
+                            <MenuItem name="auditDashboard">审计Dashboard</MenuItem>
+                            <MenuItem name="auditCatalog">目录账号审计</MenuItem>
+                            <MenuItem name="auditLogin">登录审计</MenuItem>
+                            <MenuItem name="auditVisit">访问审计</MenuItem>
+                            <MenuItem name="auditPower">权限审计</MenuItem>
+                            
+                        </Submenu>
+                        
+                    </Menu>
+
+                </div>
+                
+            </div>
+            <div class="cont_right" :style="rightStyle">
+                <div class="breadcrumb">
+                    <Breadcrumb>
+                        <BreadcrumbItem >审计</BreadcrumbItem>
+                        <BreadcrumbItem v-if="pageParent" >{{pageParent}}</BreadcrumbItem>
+                        <BreadcrumbItem>{{page}}</BreadcrumbItem>
+                    </Breadcrumb>
+                </div>
+                <keep-alive>
+                    <div :is="pageName" v-if="pageName != 'auditDashboard'"></div> 
+                    <audit-dashboard v-if="pageName == 'auditDashboard'" ref="mychild"></audit-dashboard>
+                </keep-alive>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+
+import Cookies from 'js-cookie';
+import auditDashboard from "./auditDashboard.vue";
+import auditCatalog from "./auditCatalog.vue";
+import auditLogin from "./auditLogin.vue";
+import auditVisit from "./auditVisit.vue";
+import auditPower from "./auditPower.vue";
+
+export default {
+    data () {
+        return {
+            pageName:this.$route.params.name?this.$route.params.name:'auditDashboard',
+            isCollapsed:false,
+            leftStyle:{},
+            rightStyle:{}
+        }
+    },
+    created(){
+        
+    },
+    watch:{
+       isCollapsed(val){
+           if(val){
+               this.leftStyle = {width:'20px',overflow:'hidden'}
+               this.rightStyle = {width:'calc(100% - 100px)'}
+           }else{
+               this.leftStyle = {}
+               this.rightStyle = {}
+           }
+           setTimeout(() => {
+            this.$refs.mychild.chartResize();
+           }, 310);
+       }
+    },
+    computed:{
+        pageParent(){
+            switch(this.pageName) {
+                case 'a':
+                    return ''
+                    break;
+            } 
+        },
+        page(){
+            let p = this.pageName;
+            let pp = '';
+            switch(this.pageName) {
+                case 'auditDashboard':
+                    return '审计Dashboard'
+                    break;
+                case 'auditCatalog':
+                    return '目录账号审计'
+                    break;
+                case 'auditLogin':
+                    return '登录审计'
+                    break;
+                case 'auditVisit':
+                    return '访问审计'
+                    break;
+                case 'auditPower':
+                    return '权限审计'
+                    break;
+                
+            } 
+        }
+    },
+    methods: {
+
+        menuChange(name){
+            console.log(name)
+            this.pageName = name;
+        },
+        getParent(array, childs, ids) {
+          for (let i = 0; i < array.length; i++) {
+            let item = array[i];
+            if (Number(item.id) === Number(ids)) {
+              childs.push(item);
+              return childs;
+            }
+            if (item.children && item.children.length > 0) {
+              childs.push(item);
+              let rs = getParent(item.children, childs, ids);
+              if (rs) {
+                return rs;
+              }
+              else {
+                childs.remove(item);
+              }
+            }
+          }
+          return false;
+        }
+    },
+    components:{
+        auditDashboard,
+        auditCatalog,
+        auditLogin,
+        auditVisit,
+        auditPower
+    },
+    mounted(){
+        
+    }
+};
+</script>
+
+<style lang="less" scoped>
+    .audit{
+        width: 100%;
+        height: 100%;
+        padding: 20px 20px 20px 20px;
+    }
+    .audit .cont_left{
+        width: 240px;
+        height: 100%;
+        padding: 0px;
+        box-sizing: border-box;
+        float: left;
+        background: #fff;
+        border-radius: 5px;
+        position: relative;
+        transition: width  .3s;
+        overflow: hidden;
+    }
+    .audit .cont_left .menucont{
+        width: 240px;
+        height: 100%;
+        padding: 0px;
+        overflow: auto;
+        box-sizing: border-box;
+        float: left;
+        background: #fff;
+        border-radius: 5px;
+        position: relative;
+        
+    }
+    .audit .cont_right{
+        width: calc(100% - 260px);
+        min-width: 1000px;
+        height: 100%;
+        overflow-y: auto;
+        float: left;
+        margin-left:20px ;
+        background: #fff;
+        border-radius: 5px;
+        transition: width  .3s;
+        
+    }
+    .audit .breadcrumb{
+        padding: 20px 20px 0px 20px;
+    }
+    .content{
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+    }
+    .ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu){
+        background: #e6f7ff;
+        border-bottom: 1px solid #1890ff;
+    }
+    .ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu):after {
+        display: none;
+    }
+    .ivu-menu-item{
+        background: #fff;
+        margin-top: 2px;
+    }
+    .menuTarger{
+        position: absolute;
+        left:260px;
+        top:calc(50% - 70px);
+        z-index: 1000;
+        font-size: 26px;
+        color: rgb(129, 122, 122);
+        cursor: pointer;
+        height: 138px;
+        width: 12px;
+        transition: left  .3s;
+    }
+
+
+</style>
+<style>
+
+    .catalogMenu .ivu-menu-submenu-title{
+        background: #65c1ff !important;
+        color:#fff;
+    }
+    
+</style>
